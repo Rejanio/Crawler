@@ -24,33 +24,17 @@ public class CrawlerDrone implements Runnable {
 	public List<String> tags = new LinkedList<String>();
 	public List<String> stopList = new LinkedList<String>();
     private List<Centroide> centroide;
-   
+    
     private  String endereco;
-
-	public CrawlerDrone ( String endereco ) {
+    private String termo1 = "Carro";
+    private String termo2 = "esportivos";
+    private String termo3 = "Carros";
+    
+	private boolean termoAchado = false;
+	
+    public CrawlerDrone ( String endereco ) {
 		tags.add("title");
-		tags.add("h1");
-		tags.add("h2");
-		tags.add("h3");
-		tags.add("h4");
-		tags.add("h5");
-		tags.add("h6");
-		tags.add("a");
-		tags.add("big");
-		tags.add("b");
-		tags.add("em");
-		tags.add("i");
-		tags.add("u");
-		tags.add("strong");
-		tags.add("strike");
-		tags.add("center");
-		tags.add("small");
-		tags.add("sub");
-		tags.add("sup");
-		tags.add("font");
-		tags.add("adress");
-		tags.add("meta");
-        this.centroide = new LinkedList <Centroide>(); 
+		this.centroide = new LinkedList <Centroide>(); 
 		this.endereco=endereco;
 	}
 	
@@ -58,12 +42,36 @@ public class CrawlerDrone implements Runnable {
 		return endereco;
 	}
 
-
+    
 
 	public void setEndereco(String endereco) {
 		this.endereco = endereco;
 	}	
+	
+	//verifica se os termos procurados ('carro' e 'esportivo') estão no título do da página , se tiver coloca  o valor na 
+	// variavel termoAchado 
+	public void verificadorDeBuscar(String string) throws IOException{
+		
+		if(centroide == null){
+			this.termoAchado = false;
+		}
+		else{
+			this.termoAchado = true;
+		}
+		
+		
+		String temp = this.getTitle(this.getEndereco());
+		this.classificar(temp, tags.get(0), this.getEndereco());
+		
 
+		
+		
+	}
+	
+	public boolean getTermoAchado(){
+		return this.termoAchado;
+	}
+	
 	//Vai receber uma url e retornar o titulo dela 
 	public String getTitle(String url) throws IOException {
 			Document doc = Jsoup.connect(url).get();
@@ -91,7 +99,7 @@ public class CrawlerDrone implements Runnable {
 	        
 	        @SuppressWarnings("resource")
 			Scanner scan = new Scanner(texto);
-	        System.out.println(" \n A tag atual é : " +tagAtual);
+	        //System.out.println(" \n A tag atual é : " +tagAtual);
 		
 	        int peso = this.pesoTag(tagAtual);
 	        String palavra=null;
@@ -109,7 +117,7 @@ public class CrawlerDrone implements Runnable {
 	              // criando a lista de centroide caso não exista ainda 
 	              //System.out.println("dentro do else grande");
 	              
-	              if(centroide.isEmpty()){
+	              if(centroide.isEmpty() && (palavra.equals(termo1) || palavra.equals(termo2) || palavra.equals(termo3))){
 	                  //System.out.println("Verificando se a lista da centroide ta´ vazia");
 	                  //System.out.println("valor de centroide é "+ centroide.size());
 	                  
@@ -121,14 +129,15 @@ public class CrawlerDrone implements Runnable {
 	              // caso não exista cria atribuindo os pesos e repetição
 	              //caso exista só altera os valores de repetição e peso
 	              else{
-	                  if(this.buscarPalavra(palavra)== -1){
-	                      //System.out.println("Verificando se a palavra existe e adicionando a palavra : " +palavra);
+	                  if(this.buscarPalavra(palavra) == -1 && (palavra.equals(termo1) || palavra.equals(termo2) || palavra.equals(termo3))){
+	                      System.out.println("Verificando se a palavra existe e adicionando a palavra : " +palavra);
 	                      Centroide temp = new Centroide(palavra,peso,1,endereco);
 	                      centroide.add(temp);
 	                      
 	                  }
-	                  else{
-	                      Centroide temp2 = (Centroide) centroide.get(this.buscarPalavra(palavra));
+	                  else if (this.buscarPalavra(palavra) !=-1  && (palavra.equals(termo1) || palavra.equals(termo2) || palavra.equals(termo3))){
+	                      //System.out.println(this.buscarPalavra(palavra));
+	                	  Centroide temp2 = (Centroide) centroide.get(this.buscarPalavra(palavra));
 	                      temp2.setPeso(peso);
 	                      temp2.setRepeticao(1);
 	                  }
@@ -136,9 +145,10 @@ public class CrawlerDrone implements Runnable {
 	          }
 	          
 	        }
+	        
 	        //teste para ver o q tem na lista e seus pesos
 	        for (int i = 0; i < centroide.size(); i++){
-	            Centroide temp =(Centroide) centroide.get(i);
+	            Centroide temp = (Centroide) centroide.get(i);
 	            
 	         //   System.out.println("a palavra eh : " + temp.getConteudo() + " e seu peso é : " + temp.getPeso() + " e repetições: " + temp.getRepeticao() );
 	            
@@ -269,7 +279,8 @@ public class CrawlerDrone implements Runnable {
 		
 	}
  	//e.hyperlinks(e.getTo_Visit().get(i));
-	
+	//
+	/**
 	public void inicio() throws IOException{
 		for(int j = 0; j < this.getTags().size(); j++){
 		       			   			       		
@@ -281,6 +292,8 @@ public class CrawlerDrone implements Runnable {
 		}
 
 	}
+	**/
+	
 }
 
     	
